@@ -13,16 +13,40 @@
         android:orientation="vertical">
 
         <View
-            android:layout_width="match_parent"
-            android:layout_height="35dp" />
+            android:layout_width="20dp"
+            android:layout_height="20dp"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_marginLeft="35dp"
-            android:background="@drawable/minilogo"
-            android:layout_marginTop="50dp"/>
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:paddingTop="20dp"
+            android:paddingEnd="20dp">
+
+            <ImageView
+                android:id="@+id/cjlogo"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:layout_marginRight="25dp"
+                android:src="@drawable/cb" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="start"
+            android:paddingStart="35dp"
+            android:paddingTop="10dp">
+
+            <ImageView
+                android:id="@+id/applogo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/applogo"
+                android:contentDescription="앱 로고" />
+        </LinearLayout>
 
 
         <LinearLayout
@@ -36,7 +60,9 @@
 
         </LinearLayout>
 
-
+        <View
+            android:layout_width="20dp"
+            android:layout_height="15dp"/>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -66,15 +92,16 @@
                     android:text="오늘은\n어디에 가실 건가요?"
                     android:textColor="#483A3A"
                     android:textSize="27sp"
+                    android:textStyle="bold"
                     android:layout_marginTop="10dp" />
 
                 <ImageView
-                    android:id="@+id/placeBtn"
+                    android:id="@+id/callBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="40dp"
-                    android:src="@drawable/placebtn"
-                    android:contentDescription="장소 기록 btn"/>
+                    android:src="@drawable/callbtn"
+                    android:contentDescription="긴급 전화 btn"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -84,12 +111,16 @@
             android:gravity="center"
             android:orientation="vertical">
 
+            <View
+                android:layout_width="20dp"
+                android:layout_height="50dp"/>
+
             <ImageView
                 android:id="@+id/recordBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:src="@drawable/recordbtn" />
+                android:src="@drawable/recordbtn2" />
 
         </LinearLayout>
     </LinearLayout>
