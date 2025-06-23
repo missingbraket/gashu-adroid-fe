@@ -45,7 +45,7 @@ public class RecordActivity extends AppCompatActivity {
     private double longitude = 0.0;
 
     private final OkHttpClient client = new OkHttpClient();
-    private final String backendUrl = "http://YOUR_BACKEND_URL/api/voice"; // 백엔드 URL 수정 필요
+    private final String backendUrl = "http://"; 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
