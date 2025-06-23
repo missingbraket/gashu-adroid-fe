@@ -13,6 +13,7 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
+    <!-- 음성 인식 관련 콘텐츠 정렬 영역 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,6 +23,7 @@
         android:gravity="center_horizontal"
         android:paddingBottom="40dp">
 
+        <!-- 상태 텍스트 -->
         <TextView
             android:id="@+id/statusText"
             android:layout_width="wrap_content"
@@ -31,6 +33,7 @@
             android:textColor="#333333"
             android:paddingBottom="10dp" />
 
+        <!-- 음성 인식 중 로딩 표시 -->
         <ProgressBar
             android:id="@+id/voiceProgressBar"
             style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
@@ -39,7 +42,7 @@
             android:visibility="visible"
             android:indeterminate="true" />
 
-        <!-- 인식된 텍스트 -->
+        <!-- 인식된 텍스트 출력 -->
         <TextView
             android:id="@+id/recognizedText"
             android:layout_width="wrap_content"
@@ -49,6 +52,16 @@
             android:textColor="#000000"
             android:textStyle="bold"
             android:gravity="center"
+            android:layout_marginTop="20dp"/>
+
+        <!-- 서버 응답 결과 표시용 -->
+        <TextView
+            android:id="@+id/backendResultText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="16sp"
+            android:textColor="#555555"
             android:layout_marginTop="20dp"/>
     </LinearLayout>
 </LinearLayout>
