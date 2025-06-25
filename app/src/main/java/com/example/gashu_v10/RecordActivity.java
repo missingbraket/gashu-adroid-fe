@@ -1,6 +1,7 @@
 package com.example.gashu_v10;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -9,12 +10,11 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import android.content.Intent;
-import android.speech.RecognizerIntent;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,13 +39,18 @@ public class RecordActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_PERMISSIONS = 100;
 
     private TextView statusText, recognizedText, backendResultText;
-    private ProgressBar voiceProgressBar;
+    // private LottieAnimationView voiceLottie;
+    private ProgressBar voiceProgress;
+
     private LocationManager locationManager;
     private double latitude = 0.0;
     private double longitude = 0.0;
 
     private final OkHttpClient client = new OkHttpClient();
-    private final String backend = "http://";
+    private final String backend = "http://10.0.2.2:8080/message";
+    // 주소 바꿔라아아아ㅏ
+
+    private TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +60,14 @@ public class RecordActivity extends AppCompatActivity {
         statusText = findViewById(R.id.statusText);
         recognizedText = findViewById(R.id.recognizedText);
         backendResultText = findViewById(R.id.backendResultText);
-        voiceProgressBar = findViewById(R.id.voiceProgressBar);
+        // voiceLottie = findViewById(R.id.voiceLottie);
+        voiceProgress = findViewById(R.id.voiceProgress);
+
+        tts = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                tts.setLanguage(Locale.KOREAN);
+            }
+        });
 
         checkPermissions();
     }
@@ -130,27 +142,32 @@ public class RecordActivity extends AppCompatActivity {
 
         recognizer.setRecognitionListener(new RecognitionListener() {
             @Override public void onReadyForSpeech(Bundle params) {
-                statusText.setText("듣고 있어요...");
-                voiceProgressBar.setVisibility(ProgressBar.VISIBLE);
+                statusText.setText("음성 인식 중...");
+                voiceProgress.setVisibility(View.VISIBLE);
             }
+
             @Override public void onError(int error) {
                 statusText.setText("다시 말해주세요😭 (오류 코드: " + error + ")");
-                voiceProgressBar.setVisibility(ProgressBar.GONE);
+                voiceProgress.setVisibility(View.GONE); // 로딩 숨김
             }
+
             @Override public void onResults(Bundle results) {
                 ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 if (matches != null && !matches.isEmpty()) {
                     String text = matches.get(0);
                     recognizedText.setText(text);
-                    statusText.setText("인식완료!");
+                    statusText.setText("음성 인식 완료!");
                     sendToBackend(text);
                 }
-                voiceProgressBar.setVisibility(ProgressBar.GONE);
+                voiceProgress.setVisibility(View.GONE); // 로딩 숨김
             }
+
             @Override public void onPartialResults(Bundle partialResults) {
                 ArrayList<String> partial = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                if (partial != null && !partial.isEmpty()) recognizedText.setText(partial.get(0));
+                if (partial != null && !partial.isEmpty())
+                    recognizedText.setText(partial.get(0));
             }
+
             @Override public void onBeginningOfSpeech() {}
             @Override public void onRmsChanged(float rmsdB) {}
             @Override public void onBufferReceived(byte[] buffer) {}
@@ -164,20 +181,36 @@ public class RecordActivity extends AppCompatActivity {
     private void sendToBackend(String voiceText) {
         try {
             JSONObject json = new JSONObject();
-            json.put("text", voiceText);
-            json.put("latitude", latitude);
-            json.put("longitude", longitude);
+            json.put("user_id", "0001");
+            json.put("user_message", voiceText);
+            json.put("user_lat", latitude);
+            json.put("user_lon", longitude);
 
             RequestBody body = RequestBody.create(json.toString(), MediaType.parse("application/json"));
             Request request = new Request.Builder().url(backend).post(body).build();
 
             client.newCall(request).enqueue(new Callback() {
                 @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> backendResultText.setText("서버 요청 실패: " + e.getMessage()));
+                    runOnUiThread(() -> backendResultText.setText("❌ 서버 요청 실패: " + e.getMessage()));
                 }
+
                 @Override public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                     String res = response.body().string();
-                    runOnUiThread(() -> backendResultText.setText("서버 응답: " + res));
+                    runOnUiThread(() -> {
+                        try {
+                            JSONObject jsonRes = new JSONObject(res);
+                            String reply = jsonRes.optString("message", res);
+                            backendResultText.setText("서버 응답: " + reply);
+
+                            // TTS 재생
+                            if (tts != null) {
+                                tts.speak(reply, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
+
+                        } catch (Exception e) {
+                            backendResultText.setText("응답 파싱 오류: " + e.getMessage());
+                        }
+                    });
                 }
             });
         } catch (Exception e) {
