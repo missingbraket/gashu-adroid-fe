@@ -41,6 +41,17 @@
 <!--            android:visibility="gone"-->
 <!--            android:layout_marginBottom="24dp" />-->
 
+
+        <TextView
+            android:id="@+id/recognizedText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="어케가"
+            android:textSize="24sp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"/>
+
         <ProgressBar
             android:id="@+id/voiceProgress"
             style="?android:attr/progressBarStyleLarge"
@@ -48,26 +59,25 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:layout_marginBottom="24dp" />
-
+        
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="70dp"/>
 
         <TextView
-            android:id="@+id/recognizedText"
+            android:id="@+id/backendResultText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="사용자 음성"
+            android:text="잘가"
             android:textSize="24sp"
             android:textColor="#000000"
             android:textStyle="bold"
             android:gravity="center"
             android:layout_marginTop="20dp"/>
 
-        <TextView
-            android:id="@+id/backendResultText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="서버 응답"
-            android:textSize="16sp"
-            android:textColor="#555555"
-            android:layout_marginTop="20dp"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="80dp"/>
+
     </LinearLayout>
 </LinearLayout>

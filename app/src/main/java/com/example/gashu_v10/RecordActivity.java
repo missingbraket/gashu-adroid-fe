@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -39,7 +40,6 @@ public class RecordActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_PERMISSIONS = 100;
 
     private TextView statusText, recognizedText, backendResultText;
-    // private LottieAnimationView voiceLottie;
     private ProgressBar voiceProgress;
 
     private LocationManager locationManager;
@@ -47,8 +47,7 @@ public class RecordActivity extends AppCompatActivity {
     private double longitude = 0.0;
 
     private final OkHttpClient client = new OkHttpClient();
-    private final String backend = "http://10.0.2.2:8080/message";
-    // 주소 바꿔라아아아ㅏ
+    private final String backend = "http://15.164.161.30/message";
 
     private TextToSpeech tts;
 
@@ -60,7 +59,6 @@ public class RecordActivity extends AppCompatActivity {
         statusText = findViewById(R.id.statusText);
         recognizedText = findViewById(R.id.recognizedText);
         backendResultText = findViewById(R.id.backendResultText);
-        // voiceLottie = findViewById(R.id.voiceLottie);
         voiceProgress = findViewById(R.id.voiceProgress);
 
         tts = new TextToSpeech(this, status -> {
@@ -127,6 +125,7 @@ public class RecordActivity extends AppCompatActivity {
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
             }
+
             @Override public void onStatusChanged(String provider, int status, Bundle extras) {}
             @Override public void onProviderEnabled(@NonNull String provider) {}
             @Override public void onProviderDisabled(@NonNull String provider) {}
@@ -148,18 +147,25 @@ public class RecordActivity extends AppCompatActivity {
 
             @Override public void onError(int error) {
                 statusText.setText("다시 말해주세요😭 (오류 코드: " + error + ")");
-                voiceProgress.setVisibility(View.GONE); // 로딩 숨김
+                voiceProgress.setVisibility(View.GONE);
             }
 
             @Override public void onResults(Bundle results) {
                 ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 if (matches != null && !matches.isEmpty()) {
-                    String text = matches.get(0);
+                    String text = matches.get(0).trim();
                     recognizedText.setText(text);
                     statusText.setText("음성 인식 완료!");
+
+                    if (text.isEmpty()) {
+                        backendResultText.setText("⚠️ 인식된 텍스트 없습니다. 다시 시도해주세요.");
+                        voiceProgress.setVisibility(View.GONE);
+                        return;
+                    }
+
                     sendToBackend(text);
                 }
-                voiceProgress.setVisibility(View.GONE); // 로딩 숨김
+                voiceProgress.setVisibility(View.GONE);
             }
 
             @Override public void onPartialResults(Bundle partialResults) {
@@ -183,8 +189,8 @@ public class RecordActivity extends AppCompatActivity {
             JSONObject json = new JSONObject();
             json.put("user_id", "0001");
             json.put("user_message", voiceText);
-            json.put("user_lat", latitude);
-            json.put("user_lon", longitude);
+            json.put("user_lat", String.valueOf(latitude));
+            json.put("user_lon", String.valueOf(longitude));
 
             RequestBody body = RequestBody.create(json.toString(), MediaType.parse("application/json"));
             Request request = new Request.Builder().url(backend).post(body).build();
@@ -199,10 +205,25 @@ public class RecordActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         try {
                             JSONObject jsonRes = new JSONObject(res);
-                            String reply = jsonRes.optString("message", res);
-                            backendResultText.setText("서버 응답: " + reply);
+                            String reply;
 
-                            // TTS 재생
+                            if (jsonRes.has("message")) {
+                                reply = jsonRes.getString("message");
+                            } else if (jsonRes.has("detail")) {
+                                JSONArray details = jsonRes.getJSONArray("detail");
+                                if (details.length() > 0) {
+                                    JSONObject firstDetail = details.getJSONObject(0);
+                                    String msg = firstDetail.optString("msg", "에러");
+                                    String type = firstDetail.optString("type", "");
+                                    reply = "⚠️ 오류: " + msg + (type.isEmpty() ? "" : " (" + type + ")");
+                                } else {
+                                    reply = "⚠️ 오류 응답: detail 배열이 비어 있음";
+                                }
+                            } else {
+                                reply = "⚠️ 알 수 없는 응답 형식";
+                            }
+
+                            backendResultText.setText("서버 응답: " + reply);
                             if (tts != null) {
                                 tts.speak(reply, TextToSpeech.QUEUE_FLUSH, null, null);
                             }
