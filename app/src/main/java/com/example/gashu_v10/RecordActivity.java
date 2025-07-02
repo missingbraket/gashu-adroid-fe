@@ -47,7 +47,7 @@ public class RecordActivity extends AppCompatActivity {
     private double longitude = 0.0;
 
     private final OkHttpClient client = new OkHttpClient();
-    private final String backend = "http://15.164.161.30/message";
+//    private final String backend = "http:/-/message";
 
     private TextToSpeech tts;
 
